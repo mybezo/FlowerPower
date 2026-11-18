@@ -15,14 +15,14 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
-import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.EquipmentSlotGroup;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import utils.Utils;
 
 import javax.annotation.Nonnull;
 import java.util.List;
-import java.util.UUID;
+import java.util.Locale;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -66,14 +66,18 @@ public class AttributeCharms extends SimpleSlimefunItem<ItemUseHandler> implemen
             }
 
             // Add specified attribute to offhand
-            double level = ThreadLocalRandom.current().nextDouble(minLevel.getValue(), maxLevel.getValue());
-            AttributeModifier modifier = new AttributeModifier(UUID.randomUUID(), type.attribute.getKey().getKey(),
-                    level, type.operation, EquipmentSlot.OFF_HAND);
+            double min = minLevel.getValue();
+            double max = maxLevel.getValue();
+            double level = min >= max ? min : ThreadLocalRandom.current().nextDouble(min, max);
+            NamespacedKey modifierKey = new NamespacedKey(FlowerPowerPlugin.getInstance(),
+                    "charm_" + type.name().toLowerCase(Locale.ROOT));
+            AttributeModifier modifier = new AttributeModifier(modifierKey, level, type.operation,
+                    EquipmentSlotGroup.OFFHAND);
             charmMeta.addAttributeModifier(type.attribute, modifier);
 
             // Update lore
             List<String> lore = charmMeta.getLore();
-            lore.set(LORE_INDEX, Utils.color("&a已检查该符咒"));
+            lore.set(LORE_INDEX, Utils.color("&aThis charm has been inspected"));
             charmMeta.setLore(lore);
 
             p.playSound(p.getLocation(), Sound.BLOCK_BELL_RESONATE, 1, 1);
@@ -87,12 +91,12 @@ public class AttributeCharms extends SimpleSlimefunItem<ItemUseHandler> implemen
 
     public enum Charm {
 
-        MOVEMENT_SPEED(Attribute.GENERIC_MOVEMENT_SPEED, 0.01, 0.2, AttributeModifier.Operation.MULTIPLY_SCALAR_1),
-        ATTACK_SPEED(Attribute.GENERIC_ATTACK_SPEED, 0.1, 0.5, AttributeModifier.Operation.MULTIPLY_SCALAR_1),
-        FLY_SPEED(Attribute.GENERIC_FLYING_SPEED, 0.01, 1, AttributeModifier.Operation.MULTIPLY_SCALAR_1),
-        DAMAGE(Attribute.GENERIC_ATTACK_DAMAGE, 0.01, 1, AttributeModifier.Operation.MULTIPLY_SCALAR_1),
-        MAX_HEALTH(Attribute.GENERIC_MAX_HEALTH, 1, 5, AttributeModifier.Operation.ADD_NUMBER),
-        KNOCKBACK_RESISTANCE(Attribute.GENERIC_KNOCKBACK_RESISTANCE, 0.1, 0.5, AttributeModifier.Operation.ADD_NUMBER);
+        MOVEMENT_SPEED(Attribute.MOVEMENT_SPEED, 0.01, 0.2, AttributeModifier.Operation.MULTIPLY_SCALAR_1),
+        ATTACK_SPEED(Attribute.ATTACK_SPEED, 0.1, 0.5, AttributeModifier.Operation.MULTIPLY_SCALAR_1),
+        FLY_SPEED(Attribute.FLYING_SPEED, 0.01, 1, AttributeModifier.Operation.MULTIPLY_SCALAR_1),
+        DAMAGE(Attribute.ATTACK_DAMAGE, 0.01, 1, AttributeModifier.Operation.MULTIPLY_SCALAR_1),
+        MAX_HEALTH(Attribute.MAX_HEALTH, 1, 5, AttributeModifier.Operation.ADD_NUMBER),
+        KNOCKBACK_RESISTANCE(Attribute.KNOCKBACK_RESISTANCE, 0.1, 0.5, AttributeModifier.Operation.ADD_NUMBER);
 
         private final Attribute attribute;
         private final double minLvl;

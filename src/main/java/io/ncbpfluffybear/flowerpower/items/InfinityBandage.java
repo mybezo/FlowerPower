@@ -7,9 +7,9 @@ import io.github.thebusybiscuit.slimefun4.core.attributes.NotPlaceable;
 import io.github.thebusybiscuit.slimefun4.core.handlers.ItemUseHandler;
 import io.github.thebusybiscuit.slimefun4.implementation.items.SimpleSlimefunItem;
 import io.ncbpfluffybear.flowerpower.objects.FPNotPlaceable;
-import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import org.bukkit.Sound;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
@@ -28,7 +28,7 @@ public class InfinityBandage extends SimpleSlimefunItem<ItemUseHandler> implemen
 
     public static final double HEALTH_PER_CONSUME = 1;
     public static final int EXP_PER_CONSUME = 10;
-    private final Map<Player, Long> cooldowns = new HashMap<>();
+    private final Map<UUID, Long> cooldowns = new HashMap<>();
 
     public InfinityBandage(ItemGroup category, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
         super(category, item, recipeType, recipe);
@@ -40,25 +40,25 @@ public class InfinityBandage extends SimpleSlimefunItem<ItemUseHandler> implemen
         return e -> {
             Player p = e.getPlayer();
 
-            long cooldown = cooldowns.getOrDefault(p, 0L);
+            long cooldown = cooldowns.getOrDefault(p.getUniqueId(), 0L);
             if (cooldown + 500L >= System.currentTimeMillis()) {
-                Utils.send(p, "&c物品冷却中！");
+                Utils.send(p, "&cThis item is on cooldown!");
                 return;
             }
 
             int exp = Utils.getTotalExperience(p);
             double health = p.getHealth();
-            double maxHealth = p.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue();
+            double maxHealth = p.getAttribute(Attribute.MAX_HEALTH).getValue();
 
             // Check if player has enough exp
             if (exp < EXP_PER_CONSUME) {
-                Utils.send(p, "&c你没有足够的经验值！需要：" + EXP_PER_CONSUME);
+                Utils.send(p, "&cYou can not afford this! Needed exp points: " + EXP_PER_CONSUME);
                 return;
             }
 
             // Check if player needs healing
             if (health >= maxHealth) {
-                Utils.send(p, "&c你不需要治疗！");
+                Utils.send(p, "&cYour health is already full!");
                 return;
             }
 
@@ -69,7 +69,7 @@ public class InfinityBandage extends SimpleSlimefunItem<ItemUseHandler> implemen
                 newHealth = maxHealth;
             }
             p.setHealth(newHealth);
-            cooldowns.put(p, System.currentTimeMillis());
+            cooldowns.put(p.getUniqueId(), System.currentTimeMillis());
 
             p.playSound(p.getLocation(), Sound.ENTITY_CAT_HISS, 1, 1);
 

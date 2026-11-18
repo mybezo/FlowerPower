@@ -6,12 +6,14 @@ import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.core.multiblocks.MultiBlockMachine;
+import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
+import io.github.thebusybiscuit.slimefun4.libraries.dough.protection.Interaction;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import io.ncbpfluffybear.flowerpower.FlowerPowerItems;
 import me.mrCookieSlime.Slimefun.api.BlockStorage;
 import org.bukkit.Bukkit;
-import org.bukkit.Effect;
 import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.Levelled;
@@ -23,7 +25,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.CauldronLevelChangeEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
-import utils.Constants;
 import utils.ItemStackComparator;
 import utils.Utils;
 
@@ -43,6 +44,8 @@ public class ExperienceCauldron extends SlimefunItem implements Listener {
     private static final int EXP_PER_LEVEL = 50;
     private static final MultiBlockMachine MAGIC_BASIN = (MultiBlockMachine) MagicBasin.BASIN_RECIPE.getMachine();
     private static final int MAX_CAULDRON_LEVEL = 3;
+    // Null on versions before 1.17, where cauldrons are a single levelled block
+    private static final Material WATER_CAULDRON = Material.getMaterial("WATER_CAULDRON");
 
     public ExperienceCauldron(ItemGroup category, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
         super(category, item, recipeType, recipe);
@@ -74,7 +77,7 @@ public class ExperienceCauldron extends SlimefunItem implements Listener {
             return;
         }
 
-        if (!(b.getType() == Material.CAULDRON) && !(b.getType() == Material.WATER_CAULDRON)) {
+        if (b.getType() != Material.CAULDRON && (WATER_CAULDRON == null || b.getType() != WATER_CAULDRON)) {
             return;
         }
 
@@ -84,6 +87,14 @@ public class ExperienceCauldron extends SlimefunItem implements Listener {
         }
 
         Player p = e.getPlayer();
+
+        // Prevent using cauldrons in areas the player has no access to
+        if (!Slimefun.getProtectionManager().hasPermission(p, b, Interaction.INTERACT_BLOCK)) {
+            e.cancel();
+            Utils.send(p, "&cYou do not have permission to use this Experience Cauldron!");
+            return;
+        }
+
         ItemStack handItem = p.getInventory().getItemInMainHand();
         int cauldronLevel = getCauldronLevel(b);
 
@@ -98,7 +109,7 @@ public class ExperienceCauldron extends SlimefunItem implements Listener {
         if (SlimefunUtils.isItemSimilar(handItem, FlowerPowerItems.MAGICAL_WAND, false, false)) {
 
             if (cauldronLevel == 0) {
-                Utils.send(p, "&c经验之釜没有经验了！");
+                Utils.send(p, "&cThis Experience Cauldron is out of experience!");
                 return;
             }
 
@@ -112,7 +123,7 @@ public class ExperienceCauldron extends SlimefunItem implements Listener {
             }
 
             if (itemFrames.size() != 4) {
-                Utils.send(p, "&c你需要在经验之釜的四周放置4个物品展示框！");
+                Utils.send(p, "&cYou need 4 item frames on each side of the Experience Cauldron");
                 return;
             }
 
@@ -126,7 +137,7 @@ public class ExperienceCauldron extends SlimefunItem implements Listener {
             }
 
             // None of the recipes worked
-            Utils.send(p, "&c无效的配方！");
+            Utils.send(p, "&cInvalid Recipe!");
             return;
         }
 
@@ -136,7 +147,7 @@ public class ExperienceCauldron extends SlimefunItem implements Listener {
         if (p.isSneaking()) {
             // Check if cauldron is empty
             if (cauldronLevel == 0) {
-                Utils.send(p, "&c经验之釜没有经验了！");
+                Utils.send(p, "&cThis Experience Cauldron is already empty");
                 return;
             }
 
@@ -150,13 +161,13 @@ public class ExperienceCauldron extends SlimefunItem implements Listener {
         // Insert experience into cauldron
         // Exp requirement
         if (exp < EXP_PER_LEVEL) {
-            Utils.send(p, "&c你没有足够的经验可供存储！");
+            Utils.send(p, "&cYou do not have enough exp to deposit");
             return;
         }
 
         // Check if cauldron is full
         if (cauldronLevel == MAX_CAULDRON_LEVEL) {
-            Utils.send(p, "&c经验之釜已满！");
+            Utils.send(p, "&cThis Experience Cauldron is full");
             return;
         }
 
@@ -189,7 +200,7 @@ public class ExperienceCauldron extends SlimefunItem implements Listener {
         Material mat = b.getType();
 
         if (useNewCauldrons() && mat == Material.CAULDRON) {
-            b.setType(Material.WATER_CAULDRON);
+            b.setType(WATER_CAULDRON);
             Levelled cauldron = (Levelled) b.getBlockData();
             cauldron.setLevel(i);
             b.setBlockData(cauldron);
@@ -215,7 +226,7 @@ public class ExperienceCauldron extends SlimefunItem implements Listener {
         if (useNewCauldrons()) {
             if (mat == Material.CAULDRON) {
                 return 0;
-            } else if (mat == Material.WATER_CAULDRON) {
+            } else if (mat == WATER_CAULDRON) {
                 Levelled cauldron = (Levelled) b.getBlockData();
                 return cauldron.getLevel();
             }
@@ -228,7 +239,7 @@ public class ExperienceCauldron extends SlimefunItem implements Listener {
     }
 
     private static boolean useNewCauldrons() {
-        return Constants.SERVER_VERSION.contains("1.17") || Constants.SERVER_VERSION.contains("1.18") || Constants.SERVER_VERSION.contains("1.19") || Constants.SERVER_VERSION.contains("1.20") || Constants.SERVER_VERSION.contains("1.21");
+        return WATER_CAULDRON != null;
     }
 
     /**
@@ -321,7 +332,7 @@ public class ExperienceCauldron extends SlimefunItem implements Listener {
         b.getWorld().playSound(b.getLocation(), Sound.BLOCK_BEACON_POWER_SELECT, 0.5F, 1F);
 
         Utils.runSync(() -> {
-            b.getWorld().playEffect(b.getLocation(), Effect.POTION_BREAK, 1);
+            b.getWorld().spawnParticle(Particle.WITCH, b.getLocation().add(0.5, 1, 0.5), 30, 0.3, 0.3, 0.3, 0);
             b.getWorld().dropItem(b.getLocation().add(0, 1, 0), output);
         }, 20);
     }
