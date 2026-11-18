@@ -66,14 +66,16 @@ public class AttributeCharms extends SimpleSlimefunItem<ItemUseHandler> implemen
             }
 
             // Add specified attribute to offhand
-            double level = ThreadLocalRandom.current().nextDouble(minLevel.getValue(), maxLevel.getValue());
+            double min = minLevel.getValue();
+            double max = maxLevel.getValue();
+            double level = min >= max ? min : ThreadLocalRandom.current().nextDouble(min, max);
             AttributeModifier modifier = new AttributeModifier(UUID.randomUUID(), type.attribute.getKey().getKey(),
                     level, type.operation, EquipmentSlot.OFF_HAND);
             charmMeta.addAttributeModifier(type.attribute, modifier);
 
             // Update lore
             List<String> lore = charmMeta.getLore();
-            lore.set(LORE_INDEX, Utils.color("&a已检查该符咒"));
+            lore.set(LORE_INDEX, Utils.color("&aThis charm has been inspected"));
             charmMeta.setLore(lore);
 
             p.playSound(p.getLocation(), Sound.BLOCK_BELL_RESONATE, 1, 1);

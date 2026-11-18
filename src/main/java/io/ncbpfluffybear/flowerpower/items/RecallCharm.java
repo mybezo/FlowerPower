@@ -59,7 +59,7 @@ public class RecallCharm extends SimpleSlimefunItem<ItemUseHandler> {
                 Location l = p.getLocation();
 
                 if (!Slimefun.getProtectionManager().hasPermission(p, l.getBlock(), Interaction.INTERACT_BLOCK)) {
-                    Utils.send(p, "你没有权限绑定该位置！");
+                    Utils.send(p, "You do not have permission to bind your Recall Charm here!");
                     return;
                 }
 
@@ -69,12 +69,12 @@ public class RecallCharm extends SimpleSlimefunItem<ItemUseHandler> {
 
                 // Put location info into lore
                 List<String> lore = charmMeta.getLore();
-                lore.set(LORE_INDEX, Utils.color("&3绑定位置：" + l.getWorld().getName() + " @ " +
+                lore.set(LORE_INDEX, Utils.color("&3Bound Location: " + l.getWorld().getName() + " @ " +
                         l.getBlockX() + ", " + l.getBlockY() + ", " + l.getBlockZ()));
                 charmMeta.setLore(lore);
                 charm.setItemMeta(charmMeta);
 
-                Utils.send(p, "&a召回符咒已绑定当前位置！");
+                Utils.send(p, "&aYour recall charm has been bound to your current location");
                 return;
             }
 
@@ -82,7 +82,7 @@ public class RecallCharm extends SimpleSlimefunItem<ItemUseHandler> {
 
             // Check if player has sufficient exp
             if (Utils.getTotalExperience(p) < TELEPORT_COST) {
-                Utils.send(p, "&c你没有足够的经验值！需要：" + TELEPORT_COST);
+                Utils.send(p, "&cYou can not afford to teleport! Needed exp points: " + TELEPORT_COST);
                 return;
             }
 
@@ -90,7 +90,7 @@ public class RecallCharm extends SimpleSlimefunItem<ItemUseHandler> {
 
             // Charm not bound yet
             if (locationDat == null) {
-                Utils.send(p, "&c还没有绑定位置！");
+                Utils.send(p, "&cThis recall charm has not been bound yet!");
                 return;
             }
 
@@ -99,19 +99,25 @@ public class RecallCharm extends SimpleSlimefunItem<ItemUseHandler> {
             World world = Bukkit.getWorld(UUID.fromString(location[0]));
 
             if (world == null) {
-                Utils.send(p, "&c绑定的世界不存在或尚未加载！");
+                Utils.send(p, "&cThe bound world does not exist or is not loaded!");
                 return;
             }
 
-            // Consume exp and teleport player
-            p.giveExp(-TELEPORT_COST);
-            p.teleport(new Location(world,
+            // Teleport player and consume exp only if the teleport succeeded
+            boolean teleported = p.teleport(new Location(world,
                     Integer.parseInt(location[1]) + 0.5, Integer.parseInt(location[2]),
                     Integer.parseInt(location[3]) + 0.5
             ));
+
+            if (!teleported) {
+                Utils.send(p, "&cTeleportation failed!");
+                return;
+            }
+
+            p.giveExp(-TELEPORT_COST);
             p.playSound(p.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1, 1);
 
-            Utils.send(p, "&a你已被传送！");
+            Utils.send(p, "&aYou have teleported successfully");
         };
     }
 }
