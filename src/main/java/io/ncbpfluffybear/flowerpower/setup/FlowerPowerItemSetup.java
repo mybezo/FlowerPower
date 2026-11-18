@@ -22,7 +22,6 @@ import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
-import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionType;
 
 import javax.annotation.Nonnull;
@@ -193,19 +192,19 @@ public class FlowerPowerItemSetup {
     static {
         // Build vanilla potion types for recipes
         PotionMeta speedPotionMeta = (PotionMeta) speedPotion.getItemMeta();
-        speedPotionMeta.setBasePotionData(new PotionData(PotionType.SPEED, false, true));
+        speedPotionMeta.setBasePotionType(PotionType.STRONG_SWIFTNESS);
         speedPotion.setItemMeta(speedPotionMeta);
 
         PotionMeta damagePotionMeta = (PotionMeta) damagePotion.getItemMeta();
-        damagePotionMeta.setBasePotionData(new PotionData(PotionType.STRENGTH, false, true));
+        damagePotionMeta.setBasePotionType(PotionType.STRONG_STRENGTH);
         damagePotion.setItemMeta(damagePotionMeta);
 
         PotionMeta healthPotionMeta = (PotionMeta) healthPotion.getItemMeta();
-        healthPotionMeta.setBasePotionData(new PotionData(PotionType.INSTANT_HEAL, false, true));
+        healthPotionMeta.setBasePotionType(PotionType.STRONG_HEALING);
         healthPotion.setItemMeta(healthPotionMeta);
 
         PotionMeta slownessPotionMeta = (PotionMeta) slownessPotion.getItemMeta();
-        slownessPotionMeta.setBasePotionData(new PotionData(PotionType.SLOWNESS, false, true));
+        slownessPotionMeta.setBasePotionType(PotionType.STRONG_SLOWNESS);
         slownessPotion.setItemMeta(slownessPotionMeta);
 
     }
