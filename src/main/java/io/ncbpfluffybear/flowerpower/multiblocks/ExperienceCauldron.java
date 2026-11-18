@@ -12,8 +12,8 @@ import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import io.ncbpfluffybear.flowerpower.FlowerPowerItems;
 import me.mrCookieSlime.Slimefun.api.BlockStorage;
 import org.bukkit.Bukkit;
-import org.bukkit.Effect;
 import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.Levelled;
@@ -332,7 +332,7 @@ public class ExperienceCauldron extends SlimefunItem implements Listener {
         b.getWorld().playSound(b.getLocation(), Sound.BLOCK_BEACON_POWER_SELECT, 0.5F, 1F);
 
         Utils.runSync(() -> {
-            b.getWorld().playEffect(b.getLocation(), Effect.POTION_BREAK, 1);
+            b.getWorld().spawnParticle(Particle.WITCH, b.getLocation().add(0.5, 1, 0.5), 30, 0.3, 0.3, 0.3, 0);
             b.getWorld().dropItem(b.getLocation().add(0, 1, 0), output);
         }, 20);
     }

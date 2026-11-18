@@ -1,12 +1,10 @@
 package io.ncbpfluffybear.flowerpower;
 
 import io.github.thebusybiscuit.slimefun4.libraries.dough.config.Config;
-import io.github.thebusybiscuit.slimefun4.libraries.dough.updater.GitHubBuildsUpdater;
 import io.ncbpfluffybear.flowerpower.setup.FlowerPowerItemSetup;
 import io.ncbpfluffybear.flowerpower.setup.ResearchSetup;
 import net.guizhanss.guizhanlibplugin.updater.GuizhanUpdater;
 import org.bstats.bukkit.Metrics;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import io.github.thebusybiscuit.slimefun4.api.SlimefunAddon;
@@ -14,7 +12,6 @@ import listeners.Events;
 import utils.Utils;
 
 import javax.annotation.Nonnull;
-import java.lang.reflect.Field;
 import java.util.logging.Level;
 
 /**
